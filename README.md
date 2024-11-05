@@ -9,9 +9,9 @@
 7. ESP is woken up from Deep Sleep using one of the buttons.
  
 
-#####Note: Try to disengage BT communication after text is received since it draws a lot of power. The question is how to get it back running. I am not sure if i have enough space for main power button that cuts off the power in order to forcefully restart the device. That would mean that the ESP would be running or in Deep Sleep all the time. Absence of power button is beneficial since it saves space and transfered text does not get lost on poweroff.
+##Note: Try to disengage BT communication after text is received since it draws a lot of power. The question is how to get it back running. I am not sure if i have enough space for main power button that cuts off the power in order to forcefully restart the device. That would mean that the ESP would be running or in Deep Sleep all the time. Absence of power button is beneficial since it saves space and transfered text does not get lost on poweroff.
 
-###Components: 
+##Components: 
 1. Two push buttons module: https://a.aliexpress.com/_Ey0rvsl 
 2. Li-Po Charging board: https://a.aliexpress.com/_EGzRzOv
 3. ESP-32-S3 mini: https://a.aliexpress.com/_EvDRQIV
