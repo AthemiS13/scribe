@@ -20,6 +20,7 @@
 
 ### Wiring:    
   -Display: SCL-GPIO9, SDA-GPIO8
+
   -Buttons: GPIO5, GPIO6
 
 ### Tested BT Serial app: 
