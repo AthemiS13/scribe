@@ -11,9 +11,8 @@ U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 const int button1Pin = 5;
 const int button2Pin = 6;
 const unsigned long pairingHoldTime = 3000; // 3 seconds for pairing mode activation
-const unsigned long toggleWindow = 600; // 200 ms window to detect both button presses
-unsigned long button1HoldStart = 0; // Timer for button 1 hold
-const unsigned long resetHoldTime = 3000; // 3 seconds for reset
+const unsigned long resetHoldTime = 3000;   // 3 seconds for reset
+const unsigned long statusDuration = 2000;  // Duration for status messages to be visible
 
 NimBLEServer* pServer = nullptr;
 NimBLECharacteristic* pCharacteristic = nullptr;
@@ -24,9 +23,8 @@ bool displayOn = true; // Track display status
 const int maxPages = 10;
 String pages[maxPages];
 unsigned long statusDisplayTime = 0;
-const unsigned long statusDisplayDuration = 2000;
+unsigned long button1HoldStart = 0; // Track button1 hold start time
 unsigned long button2HoldStart = 0; // Track button2 hold start time
-unsigned long lastButtonPressTime = 0; // Track time of last button press
 
 #define SERVICE_UUID "12345678-1234-1234-1234-123456789012"
 #define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
@@ -59,7 +57,7 @@ class MyCharacteristicCallbacks : public NimBLECharacteristicCallbacks {
       Serial.println(receivedText);
       divideIntoPages(receivedText);
       currentPage = 0;
-      if (displayOn) updateDisplay();
+      updateDisplay();
     }
   }
 };
@@ -82,8 +80,6 @@ void setup() {
   pServer->getAdvertising()->start();
   Serial.println("Waiting for a connection...");
 }
-
-
 
 void loop() {
   bool button1Pressed = digitalRead(button1Pin) == LOW;
@@ -113,6 +109,8 @@ void loop() {
     if (button1HoldStart == 0) button1HoldStart = millis(); // Start timer
     else if (millis() - button1HoldStart >= resetHoldTime) {
       Serial.println("Resetting ESP32...");
+      showStatus("Restarting..."); // Show restart message
+      delay(1000); // Delay for user to see the "Restarting..." message
       esp_restart(); // Trigger a reset of the ESP32
     }
   } else {
@@ -137,13 +135,25 @@ void loop() {
     }
   }
 
+  // Keep status message active until new text is received or reset
+  if (receivedText.isEmpty() && millis() - statusDisplayTime > statusDuration) {
+    showStatus("Waiting...");
+  }
+
+  // Check for Bluetooth connection stability
+  if (!deviceConnected) {
+    pServer->startAdvertising();
+    Serial.println("Re-advertising...");
+  }
+
   // Automatically switch back to text display after showing connection status
-  if (millis() - statusDisplayTime > statusDisplayDuration && statusDisplayTime > 0) {
-    if (displayOn) updateDisplay();
+  if (millis() - statusDisplayTime > statusDuration && statusDisplayTime > 0) {
+    if (displayOn && !receivedText.isEmpty()) {
+      updateDisplay(); // Update display with the text
+    }
     statusDisplayTime = 0;
   }
 }
-
 
 void divideIntoPages(String text) {
   int lineWidth = SCREEN_WIDTH - 10;
@@ -170,11 +180,11 @@ void divideIntoPages(String text) {
 }
 
 void showStatus(const char* status) {
+  statusDisplayTime = millis();
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_ncenB08_tr);
   u8g2.drawStr(0, 12, status);
   u8g2.sendBuffer();
-  statusDisplayTime = millis();
 }
 
 void updateDisplay() {
