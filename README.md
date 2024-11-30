@@ -20,14 +20,18 @@ https://oshwlab.com/atemis/smartpen
 ##### Note: Try to disengage BT communication after text is received since it draws a lot of power. The question is how to get it back running. I am not sure if i have enough space for the main power button that cuts off the power in order to forcefully restart the device. That would mean that the ESP would be running or in Deep Sleep all the time. The absence of a power button is beneficial since it saves space and transferred text does not get lost on power-off.
 
 ### Components: 
-1. Two push **buttons** module: https://a.aliexpress.com/_Ey0rvsl 
+1. Two push **buttons** module: https://a.aliexpress.com/_Ey0rvsl
+   
 2. Li-Po **Charging** board: https://a.aliexpress.com/_EGzRzOv
+   
  ![Charging board](https://github.com/freddycz/smart-pen/blob/main/Hardware/charging.png)
-4. **ESP-32-S3 mini:** https://a.aliexpress.com/_EvDRQIV
+3. **ESP-32-S3 mini:** https://a.aliexpress.com/_EvDRQIV
+
 ![ESP-32-S3](https://github.com/freddycz/smart-pen/blob/main/Hardware/esp.png)
-5. 0.91 Inch, 128x32 **Display** (Uses I2C communication): https://a.aliexpress.com/_Exftypj
+4. 0.91 Inch, 128x32 **Display** (Uses I2C communication): https://a.aliexpress.com/_Exftypj
+
 ![Display](https://github.com/freddycz/smart-pen/blob/main/Hardware/display.png)
-6. Disposable vape 500 mAh Li-Po **Battery**
+5. Disposable vape 500 mAh Li-Po **Battery**
 
 ### Wiring:    
   **-Display:** SCL-GPIO9, SDA-GPIO8
