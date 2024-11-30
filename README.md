@@ -1,3 +1,5 @@
+# PCB for SmartPen available here: https://oshwlab.com/atemis/smartpen
+
 # SmartPen requirements:
 1. BT connection **status** displayed on startup
 2. ESP waits for **text** being sent through the BT serial terminal by the connected device
