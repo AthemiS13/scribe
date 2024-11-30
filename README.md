@@ -1,4 +1,5 @@
-# PCB for SmartPen available here: https://oshwlab.com/atemis/smartpen
+# PCB for SmartPen available here: 
+https://oshwlab.com/atemis/smartpen
 
 # SmartPen requirements:
 1. BT connection **status** displayed on startup
