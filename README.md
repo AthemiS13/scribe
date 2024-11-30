@@ -1,5 +1,6 @@
 # PCB for SmartPen available here: 
 https://oshwlab.com/atemis/smartpen
+![PCB-FRONT](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160039.png)
 
 # SmartPen requirements:
 1. BT connection **status** displayed on startup
