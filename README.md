@@ -15,7 +15,7 @@ https://oshwlab.com/atemis/smartpen
 5. You can ignore the info bellow. It only contains some old notes for me and [George](https://github.com/freddycz "George") but it is now outdated anyway because of the new PCB.
 
 ## Sponsored by:
-![Sponsor]([https://github.com/AthemiS13/smart-pen/blob/main/Hardware/oshw.png])
+![Sponsor](https://github.com/AthemiS13/smart-pen/blob/main/Hardware/oshw.png)
 
 
 
