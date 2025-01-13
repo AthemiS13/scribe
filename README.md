@@ -31,13 +31,12 @@ SmartPen is a compact device designed to enhance productivity and memory retenti
 
 ## Features
 
-**Core:** ESP32-S3FN8 Processor with integrated 8MB Flash Memory
-**Communication:** Bluetooth, Wifi and Serial USB-C
-**Power management:** Single cell Li-Po 3.7v Battery charging circuit with 0.6A Charging current and overcharging, discharging, overcurrent protection.
-**Screen:** 0.91 Inch OLED i2C with SSD1306 driver
-**Buttons:** The System button is present physically on the PCB. The cartridge button is a soldering pad on one end of the PCB. Boot and EN are exposed solder pads (You can short them and trigger the action in an emergency).
+**Core:** ESP32-S3FN8 Processor with integrated 8MB Flash Memory    
+**Communication:** Bluetooth, Wifi and Serial USB-C    
+**Power management:** Single cell Li-Po 3.7v Battery charging circuit with 0.6A Charging current and overcharging, discharging, overcurrent protection.    
+**Screen:** 0.91 Inch OLED i2C with SSD1306 driver    
+**Buttons:** The System button is present physically on the PCB. The cartridge button is a soldering pad on one end of the PCB. Boot and EN are exposed solder pads (You can short them and trigger the action in an emergency).    
 **Sensors:** Capacitive Touch pin and Battery voltage level ADC (Needs to be calibrated)
-
 
 
 ## Sponsored by:
