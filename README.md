@@ -12,7 +12,6 @@ https://oshwlab.com/atemis/smartpen
 2. SmartPen now has a custom 12 mm PCB (more than 60% smaller than V1) and many other features including battery status indicator, lipo protection, in-hand detection, reworked main switch, and more
 3. I will update the .md of this project once my colleague [George](https://github.com/freddycz "George") finishes the user interface.
 4. 3D design is still not done yet since I have a lot of work.
-5. You can ignore the info bellow. It only contains some old notes for me and [George](https://github.com/freddycz "George") but it is now outdated anyway because of the new PCB.
 
 # SmartPen
 
