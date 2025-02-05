@@ -3,215 +3,122 @@
 #include <U8g2lib.h>
 #include <NimBLEDevice.h>
 
+
+// OLED Setup with fixed SCL (pin 4) and SDA (pin 5)
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 #define OLED_RESET -1
-U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
-const int button1Pin = 5;
-const int button2Pin = 6;
-const unsigned long pairingHoldTime = 3000; // 3 seconds for pairing mode activation
-const unsigned long resetHoldTime = 3000;   // 3 seconds for reset
-const unsigned long statusDuration = 2000;  // Duration for status messages to be visible
+// Define the I2C pins
+#define SDA_PIN 5
+#define SCL_PIN 4
 
-NimBLEServer* pServer = nullptr;
-NimBLECharacteristic* pCharacteristic = nullptr;
+// Initialize U8g2 with I2C (using the defined SDA and SCL pins)
+U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, SDA_PIN, SCL_PIN);
+
+// Bluetooth Setup
+NimBLECharacteristic* pCharacteristic;  // Characteristic to receive data
 bool deviceConnected = false;
-String receivedText = "";
-int currentPage = 0;
-bool displayOn = true; // Track display status
-const int maxPages = 10;
-String pages[maxPages];
-unsigned long statusDisplayTime = 0;
-unsigned long button1HoldStart = 0; // Track button1 hold start time
-unsigned long button2HoldStart = 0; // Track button2 hold start time
+String receivedText = "";  // To store the received text
 
-#define SERVICE_UUID "12345678-1234-1234-1234-123456789012"
-#define CHARACTERISTIC_UUID "87654321-4321-4321-4321-210987654321"
-
-void divideIntoPages(String text);
-void showStatus(const char* status);
-void updateDisplay();
-void toggleDisplay();
-
+// Callback class to handle connection events
 class MyServerCallbacks : public NimBLEServerCallbacks {
   void onConnect(NimBLEServer* pServer) {
     deviceConnected = true;
-    Serial.println("Device connected");
-    showStatus("Connected");
+    Serial.println("Device connected!");
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 12, "Device connected");
+    u8g2.sendBuffer();
   }
 
   void onDisconnect(NimBLEServer* pServer) {
     deviceConnected = false;
-    Serial.println("Device disconnected");
-    showStatus("Waiting...");
+    Serial.println("Device disconnected!");
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 12, "Device disconnected");
+    u8g2.sendBuffer();
   }
 };
 
+// Callback class to handle write events on the characteristic
 class MyCharacteristicCallbacks : public NimBLECharacteristicCallbacks {
   void onWrite(NimBLECharacteristic* pCharacteristic) {
     std::string value = pCharacteristic->getValue();
     if (value.length() > 0) {
-      receivedText = String(value.c_str());
-      Serial.print("Received: ");
-      Serial.println(receivedText);
-      divideIntoPages(receivedText);
-      currentPage = 0;
-      updateDisplay();
+      receivedText = String(value.c_str());  // Store the received text
+      Serial.print("Received text: ");
+      Serial.println(receivedText.c_str());  // Print received text to Serial Monitor
+
+      // Display the received text on the OLED
+      u8g2.clearBuffer();
+      u8g2.setFont(u8g2_font_ncenB08_tr);
+      u8g2.drawStr(0, 12, "Received Text:");
+      u8g2.drawStr(0, 24, receivedText.c_str());  // Print text onto the OLED
+      u8g2.sendBuffer();
     }
   }
 };
 
 void setup() {
+  // Start Serial communication for logging
   Serial.begin(115200);
-  u8g2.begin();
-  u8g2.setDisplayRotation(U8G2_R2);
-  pinMode(button1Pin, INPUT_PULLUP);
-  pinMode(button2Pin, INPUT_PULLUP);
+  delay(1000);  // Wait for Serial to initialize
 
-  NimBLEDevice::init("ESP32_SmartPen");
-  pServer = NimBLEDevice::createServer();
+  // Initialize OLED
+  Wire.begin(SDA_PIN, SCL_PIN); // Manually define SDA and SCL pins
+  u8g2.begin();  // Initialize the display
+
+  // Display a message on the OLED for debugging
+  u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.drawStr(0, 12, "Initializing OLED...");
+  u8g2.sendBuffer();
+
+  // Wait for a few seconds to check if the OLED works
+  delay(3000);
+
+  // Initialize BLE (Bluetooth Low Energy)
+  Serial.println("Initializing ESP32 as Bluetooth device...");
+  NimBLEDevice::init("ESP32_Bluetooth_Serial");
+  Serial.println("BLE Initialized!");
+
+  // Create BLE server and set callbacks
+  NimBLEServer* pServer = NimBLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
 
-  NimBLEService* pService = pServer->createService(SERVICE_UUID);
-  pCharacteristic = pService->createCharacteristic(CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
+  // Create a service
+  NimBLEService* pService = pServer->createService("12345678-1234-1234-1234-123456789012");
+
+  // Create a characteristic with READ and WRITE properties
+  pCharacteristic = pService->createCharacteristic(
+                        "87654321-4321-4321-4321-210987654321",
+                        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE);
+  
+  // Set callback for the characteristic
   pCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+  
+  // Start the service
   pService->start();
-  pServer->getAdvertising()->start();
-  Serial.println("Waiting for a connection...");
+  
+  // Start advertising (make ESP32 visible to other devices)
+  NimBLEDevice::getAdvertising()->start();
+  Serial.println("Advertising started. ESP32 is now visible.");
+  
+  // Display connection status on OLED
+  u8g2.clearBuffer();
+  u8g2.drawStr(0, 12, "Waiting for device...");
+  u8g2.sendBuffer();
 }
 
 void loop() {
-  bool button1Pressed = digitalRead(button1Pin) == LOW;
-  bool button2Pressed = digitalRead(button2Pin) == LOW;
-
-  // Check if both buttons are pressed together for display toggle
-  if (button1Pressed && button2Pressed) {
-    toggleDisplay();
-    delay(300); // Debounce delay for combined button press
-  }
-
-  // Check for long press on button 2 for pairing mode
-  if (button2Pressed) {
-    if (button2HoldStart == 0) button2HoldStart = millis(); // Start timer
-    else if (millis() - button2HoldStart >= pairingHoldTime) {
-      pServer->startAdvertising(); // Re-enter pairing mode
-      Serial.println("Entered pairing mode");
-      showStatus("Pairing mode");
-      button2HoldStart = 0; // Reset hold timer after activating pairing
-    }
+  // Keep checking if the device is connected and print a message every 2 seconds
+  if (deviceConnected) {
+    Serial.println("Device connected and ready to receive text...");
+    delay(2000);  // Delay for 2 seconds
   } else {
-    button2HoldStart = 0; // Reset hold timer if button is released
-  }
-
-  // Check for long press on button 1 for reset
-  if (button1Pressed) {
-    if (button1HoldStart == 0) button1HoldStart = millis(); // Start timer
-    else if (millis() - button1HoldStart >= resetHoldTime) {
-      Serial.println("Resetting ESP32...");
-      showStatus("Restarting..."); // Show restart message
-      delay(1000); // Delay for user to see the "Restarting..." message
-      esp_restart(); // Trigger a reset of the ESP32
-    }
-  } else {
-    button1HoldStart = 0; // Reset hold timer if button is released
-  }
-
-  // Pagination controls, only active if display is on
-  if (displayOn) {
-    if (button1Pressed && !button2Pressed) {
-      if (currentPage > 0) {
-        currentPage--;
-        updateDisplay();
-        delay(300); // Debounce delay for pagination
-      }
-    }
-    if (!button1Pressed && button2Pressed) {
-      if (currentPage < maxPages - 1 && !pages[currentPage + 1].isEmpty()) {
-        currentPage++;
-        updateDisplay();
-        delay(300); // Debounce delay for pagination
-      }
-    }
-  }
-
-  // Keep status message active until new text is received or reset
-  if (receivedText.isEmpty() && millis() - statusDisplayTime > statusDuration) {
-    showStatus("Waiting...");
-  }
-
-  // Check for Bluetooth connection stability
-  if (!deviceConnected) {
-    pServer->startAdvertising();
-    Serial.println("Re-advertising...");
-  }
-
-  // Automatically switch back to text display after showing connection status
-  if (millis() - statusDisplayTime > statusDuration && statusDisplayTime > 0) {
-    if (displayOn && !receivedText.isEmpty()) {
-      updateDisplay(); // Update display with the text
-    }
-    statusDisplayTime = 0;
-  }
-}
-
-void divideIntoPages(String text) {
-  int lineWidth = SCREEN_WIDTH - 10;
-  int lineHeight = 12;
-  int linesPerPage = SCREEN_HEIGHT / lineHeight;
-
-  String line, page;
-  int lineCount = 0, pageCount = 0;
-  for (int i = 0; i < text.length(); i++) {
-    line += text[i];
-    if (u8g2.getStrWidth(line.c_str()) >= lineWidth || text[i] == '\n') {
-      page += line + "\n";
-      line = "";
-      lineCount++;
-      if (lineCount >= linesPerPage) {
-        pages[pageCount++] = page;
-        page = "";
-        lineCount = 0;
-        if (pageCount >= maxPages) break;
-      }
-    }
-  }
-  if (page.length() > 0 && pageCount < maxPages) pages[pageCount] = page;
-}
-
-void showStatus(const char* status) {
-  statusDisplayTime = millis();
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  u8g2.drawStr(0, 12, status);
-  u8g2.sendBuffer();
-}
-
-void updateDisplay() {
-  if (!displayOn) return; // Only update if display is on
-
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_ncenB08_tr);
-  int y = 12;
-
-  if (!pages[currentPage].isEmpty()) {
-    int lineStart = 0;
-    for (int i = 0; i < pages[currentPage].length(); i++) {
-      if (pages[currentPage][i] == '\n' || i == pages[currentPage].length() - 1) {
-        u8g2.drawStr(0, y, pages[currentPage].substring(lineStart, i).c_str());
-        y += 12;
-        lineStart = i + 1;
-      }
-    }
-  }
-  u8g2.sendBuffer();
-}
-
-void toggleDisplay() {
-  displayOn = !displayOn;
-  if (!displayOn) {
-    u8g2.clearDisplay(); // Turn off the display
-  } else {
-    updateDisplay(); // Turn on and update with saved content
+    Serial.println("Waiting for connection...");
+    delay(2000);  // Delay for 2 seconds
   }
 }
