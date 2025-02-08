@@ -1,4 +1,4 @@
-![Scribe-banner](https://github.com/freddycz/smart-pen/blob/main/Hardware/banner.png)
+![Scribe-banner](https://github.com/freddycz/smart-pen/blob/main/Hardware/Banner.png)
 
 # Update 2025: 
 ## PCB for SmartPen available here: 
