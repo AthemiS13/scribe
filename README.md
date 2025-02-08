@@ -1,3 +1,5 @@
+![Scribe-banner](https://github.com/freddycz/smart-pen/blob/main/Hardware/banner.png)
+
 # Update 2025: 
 ## PCB for SmartPen available here: 
 https://oshwlab.com/atemis/smartpen
