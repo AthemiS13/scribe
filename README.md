@@ -1,7 +1,7 @@
 ![Scribe-banner](https://github.com/freddycz/smart-pen/blob/main/Hardware/Banner.png)
 
 # Update 2025: 
-## PCB for SmartPen available here: 
+## PCB for scribe available here: 
 https://oshwlab.com/atemis/smartpen
 
 ![PCB-FRONT](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160039.png)
@@ -10,14 +10,14 @@ https://oshwlab.com/atemis/smartpen
 
 ![PCB-LAYOUT](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160855.png)
 
-1. After 2 months of 24/7 grind, I was able to get SmartPen to work. I would like to thank [OSHW LAB](https://oshwlab.com/ "OSHW") for sponsoring me. Without them, it would be extremely difficult to complete this project because of its very high cost.
-2. SmartPen now has a custom 12 mm PCB (more than 60% smaller than V1) and many other features including battery status indicator, lipo protection, in-hand detection, reworked main switch, and more
+1. After 2 months of 24/7 grind, I was able to get scribe to work. I would like to thank [OSHW LAB](https://oshwlab.com/ "OSHW") for sponsoring me. Without them, it would be extremely difficult to complete this project because of its very high cost.
+2. Scribe now has a custom 12 mm PCB (more than 60% smaller than V1) and many other features including battery status indicator, lipo protection, in-hand detection, reworked main switch, and more
 3. I will update the .md of this project once my colleague [George](https://github.com/freddycz "George") finishes the user interface.
 4. 3D design is still not done yet since I have a lot of work.
 
-# SmartPen
+# scribe
 
-SmartPen is a compact device designed to enhance productivity and memory retention
+scribe is a compact device designed to enhance productivity and memory retention
 
 ## Wiring
 
