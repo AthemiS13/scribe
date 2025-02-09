@@ -26,82 +26,90 @@ const char* pages[][2] = {
 const int totalPages = sizeof(pages) / sizeof(pages[0]);
 
 int currentPage = 0;
-bool buttonPressed = false;
+bool isScreenOn = true;
+
+// Timing thresholds (in milliseconds)
+#define DEBOUNCE_TIME 50
+#define LONG_PRESS_TIME 1000
+#define DOUBLE_PRESS_TIME 400
+
+// Button state tracking
 unsigned long lastPressTime = 0;
-const unsigned long debounceDelay = 200; // 200ms debounce time
-
-void IRAM_ATTR handleButtonPress() {
-  unsigned long currentTime = millis();
-  
-  // Only process the button press if it's past the debounce time
-  if (currentTime - lastPressTime > debounceDelay) {
-    lastPressTime = currentTime;
-    buttonPressed = true;
-  }
-}
-
-// Function to wrap text to fit within the screen width
-void wrapText(const char* text, int maxWidth, int y) {
-  char buffer[20];  // Assuming each line won't be longer than 20 characters
-  int lineStart = 0;
-  int lineEnd = 0;
-  
-  // Split the text into lines and draw them
-  while (text[lineEnd] != '\0') {
-    // Check if the current line fits within the width of the display
-    if (u8g2.getStrWidth(&text[lineStart]) > maxWidth) {
-      // If it doesn't, move to the next line
-      u8g2.drawStr(0, y, buffer);
-      y += 12;  // Adjust the Y position for the next line
-      lineStart = lineEnd;  // Move the start to the new line
-    }
-    lineEnd++;
-  }
-  u8g2.drawStr(0, y, &text[lineStart]);  // Draw the last line
-}
+unsigned long pressStartTime = 0;
+bool buttonPressed = false;
+bool longPressDetected = false;
+int pressCount = 0;
 
 void displayPage(int page) {
-  u8g2.clearBuffer();
-  
-  // Use a larger, more readable font
-  u8g2.setFont(u8g2_font_helvB08_tr);  // Larger font (8x10)
-
-  // Wrap text: split the text into lines if it exceeds the screen width
-  wrapText(pages[page][0], SCREEN_WIDTH, 12);  // First line
-  wrapText(pages[page][1], SCREEN_WIDTH, 24);  // Second line
-
-  u8g2.sendBuffer();
+  if (isScreenOn) {
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_5x7_tr);  
+    u8g2.drawStr(0, 12, pages[page][0]);
+    u8g2.drawStr(0, 24, pages[page][1]);
+    u8g2.sendBuffer();
+  } else {
+    u8g2.clearBuffer();
+    u8g2.sendBuffer();  // Ensure screen is off
+  }
 }
 
 void setup() {
-  // Start Serial communication for logging
   Serial.begin(115200);
-  delay(1000);  // Wait for Serial to initialize
+  delay(1000);
 
-  // Initialize OLED
-  Wire.begin(SDA_PIN, SCL_PIN); // Manually define SDA and SCL pins
-  u8g2.begin();  // Initialize the display
+  Wire.begin(SDA_PIN, SCL_PIN);
+  u8g2.begin();
 
-  // Initialize the button
   pinMode(BUTTON_PIN, INPUT_PULLDOWN);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), handleButtonPress, RISING);
 
-  // Display the first page
   displayPage(currentPage);
 }
 
 void loop() {
-  if (buttonPressed) {
-    // Handle button press logic (single click: go to the next page)
-    currentPage = (currentPage + 1) % totalPages;
-    displayPage(currentPage);
-    
-    Serial.print("Switched to page: ");
-    Serial.println(currentPage + 1);
+  static unsigned long lastUpdateTime = 0;
+  unsigned long currentTime = millis();
+  
+  int buttonState = digitalRead(BUTTON_PIN);
 
-    // Reset the button state
+  if (buttonState == HIGH && !buttonPressed) {
+    // Button just pressed
+    buttonPressed = true;
+    pressStartTime = currentTime;
+    pressCount++;
+  } else if (buttonState == LOW && buttonPressed) {
+    // Button just released
     buttonPressed = false;
+
+    if ((currentTime - pressStartTime) >= LONG_PRESS_TIME) {
+      longPressDetected = true;
+    } else {
+      lastPressTime = currentTime;
+    }
   }
 
-  delay(50);  // Short delay to keep the loop responsive
+  // Check for events
+  if (!buttonPressed && (currentTime - lastPressTime > DEBOUNCE_TIME)) {
+    if (longPressDetected) {
+      // Long press: Move one page backward
+      currentPage = (currentPage - 1 + totalPages) % totalPages;
+      displayPage(currentPage);
+      Serial.println("Long Press: Moved one page backward.");
+      pressCount = 0;
+      longPressDetected = false;
+    } else if (pressCount == 1 && (currentTime - lastPressTime > DOUBLE_PRESS_TIME)) {
+      // Single press: Toggle screen on/off
+      isScreenOn = !isScreenOn;
+      displayPage(currentPage);
+      Serial.println(isScreenOn ? "Single Press: Screen turned on." : "Single Press: Screen turned off.");
+      pressCount = 0;
+    } else if (pressCount == 2) {
+      // Double press: Move one page forward
+      currentPage = (currentPage + 1) % totalPages;
+      displayPage(currentPage);
+      Serial.println("Double Press: Moved one page forward.");
+      pressCount = 0;
+    }
+  }
+
+  delay(10); // Small delay for stability
 }
