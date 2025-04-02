@@ -274,6 +274,7 @@ void handle_double_press() {
 }
 
 void handle_long_press() {
+    is_screen_on = true;
     advertise = true;
 }
 
