@@ -160,7 +160,7 @@ void display_page(char *val, int f_size) {
 int get_lines_per_page(int f_size) {
   switch (f_size) {
     case 1:
-      return 3;
+      return 4;
     case 2:
       return 2;
     default:
