@@ -83,7 +83,7 @@ int add_page(struct pages *all_pages, char *buf, int lines) {
     int i;
     int lines_read = 0;
 
-    for (i = 0; i < MAX_LINE_LEN; i++) {
+    for (i = 0; i < (MAX_LINE_LEN + 1) * lines; i++) { //adding 1 to max_line_len to make space for end-of-line character 
 	    if (buf[i] == '\0') {
 	        break;
 	    }
@@ -287,8 +287,7 @@ bool long_press_detected = false;
 
 //check for press, double-press and long-press 
 void check_for_actions(int btn_state) {
-  unsigned long now = millis();
-
+    unsigned long now = millis();
 
     if (btn_state == HIGH && !is_pressed) {
         // Button just pressed 
@@ -419,25 +418,6 @@ void setup() {
 }
 
 void loop() {
-  /*
-  if (!deviceConnected && oldDeviceConnected) {
-        delay(500); // give the bluetooth stack the chance to get things ready
-        pServer->startAdvertising(); // restart advertising
-        Serial.println("start advertising");
-        oldDeviceConnected = deviceConnected;
-    }
-    // Connecting
-    if (deviceConnected && !oldDeviceConnected) {
-        // do stuff here on connecting
-        oldDeviceConnected = deviceConnected;
-    }
-  if (all_pages.curr != NULL) {
-	  next_page(&all_pages);	
-    display_page(all_pages.curr->data, font_size); 
-  }
-
-   delay(3000); // Small delay for stability
-  */
   if (advertise && !device_connected) {
       display_page("Waiting for\nconnection...", 1);
       delay(500); 
