@@ -393,13 +393,15 @@ void setup() {
   pCharacteristic_1 = pService->createCharacteristic(
                       CHARACTERISTIC_UUID_1,
                       BLECharacteristic::PROPERTY_READ   |
-                      BLECharacteristic::PROPERTY_WRITE
+                      BLECharacteristic::PROPERTY_WRITE  |
+                      BLECharacteristic::PROPERTY_WRITE_NR
   );                   
 
   pCharacteristic_2 = pService->createCharacteristic(
                       CHARACTERISTIC_UUID_2,
                       BLECharacteristic::PROPERTY_READ   |
-                      BLECharacteristic::PROPERTY_WRITE
+                      BLECharacteristic::PROPERTY_WRITE  |
+                      BLECharacteristic::PROPERTY_WRITE_NR
   );  
 
   // add callback functions here:
