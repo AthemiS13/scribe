@@ -274,6 +274,10 @@ void handle_double_press() {
 }
 
 void handle_long_press() {
+    if (pServer->getConnectedCount() > 0) {
+      pServer->disconnect(0);
+      device_connected = false;
+    }
     is_screen_on = true;
     advertise = true;
 }
