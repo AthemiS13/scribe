@@ -33,9 +33,21 @@
 #define HTTP_RETRIES 3               // Number of HTTP retry attempts
 
 // WiFi and Gemini Configuration (FILL THESE IN!)
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "Wifi";
+const char* password = "11111111";
 const char* geminiApiKey = "";
+
+// Static IP Configuration (helps with iPhone hotspot connectivity)
+// Multiple IP ranges for different iPhone hotspot configurations
+IPAddress local_IP_1(172, 20, 10, 2);    // Most common iPhone hotspot range
+IPAddress gateway_1(172, 20, 10, 1);
+IPAddress local_IP_2(192, 168, 43, 2);   // Alternative iPhone hotspot range
+IPAddress gateway_2(192, 168, 43, 1);
+IPAddress local_IP_3(10, 0, 0, 2);       // Third common range
+IPAddress gateway_3(10, 0, 0, 1);
+IPAddress subnet(255, 255, 255, 0);      // Subnet mask
+IPAddress primaryDNS(8, 8, 8, 8);        // Google DNS
+IPAddress secondaryDNS(8, 8, 4, 4);      // Google DNS secondary
 
 // Display Settings
 #define BOOT_SCREEN_DURATION 2000    // Boot screen display time (ms)
@@ -264,55 +276,7 @@ void process_data_into_pages(char *buf, int l) { //l = lines per page
     }
 }
 
-// Animated welcome boot screen
-void showWelcomeScreen() {
-  String text = "Scribe";
-  display.setTextSize(3);
-  display.setTextColor(SSD1306_WHITE);
-  
-  // Get text dimensions
-  int16_t x1, y1;
-  uint16_t w, h;
-  display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
-  int finalX = (SCREEN_WIDTH - w) / 2;
-  int finalY = (SCREEN_HEIGHT - h) / 2;
-  
-  // Phase 1: Slide in from left
-  for(int x = -w; x <= finalX; x += 4) {
-    display.clearDisplay();
-    display.setCursor(x, finalY);
-    display.print(text);
-    display.display();
-    delay(30);
-  }
-  
-  // Phase 2: Hold steady with blinking effect
-  for(int i = 0; i < 8; i++) {
-    display.clearDisplay();
-    if(i % 2 == 0) {
-      display.setCursor(finalX, finalY);
-      display.print(text);
-      
-      // Add underline effect
-      display.drawLine(finalX, finalY + h + 2, finalX + w, finalY + h + 2, SSD1306_WHITE);
-    }
-    display.display();
-    delay(150);
-  }
-  
-  // Phase 3: Final display with version info
-  display.clearDisplay();
-  display.setCursor(finalX, finalY);
-  display.print(text);
-  display.drawLine(finalX, finalY + h + 2, finalX + w, finalY + h + 2, SSD1306_WHITE);
-  
-  // Add version/mode info at bottom
-  display.setTextSize(1);
-  display.setCursor(0, SCREEN_HEIGHT - 8);
-  display.print("Dual-Mode v2.0");
-  display.display();
-  delay(800);
-}
+
 
 // Load device mode from storage
 DeviceMode loadMode() {
@@ -404,22 +368,108 @@ void drawWiFiFailedScreen(){
   display.display();
 }
 
-// Gemini 2.0 Flash Call with retry & timeout
-String queryAI(String input){
-  // Try to connect to WiFi when query is made
-  if(WiFi.status() != WL_CONNECTED){
-    drawWiFiConnectingScreen();
-    WiFi.begin(ssid, password);
-    unsigned long start = millis();
-    while(WiFi.status() != WL_CONNECTED && millis() - start < WIFI_TIMEOUT) {
-      delay(200);
+void drawWiFiSuccessScreen(){
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
+  display.print("WiFi Connected!");
+  display.setCursor(0,10);
+  display.print("Processing...");
+  display.display();
+}
+
+// Enhanced WiFi connection with multiple iPhone hotspot ranges
+bool connectToWiFi() {
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi already connected");
+    Serial.print("Current IP: "); Serial.println(WiFi.localIP());
+    return true;
+  }
+  
+  drawWiFiConnectingScreen();
+  Serial.println("=== WiFi Connection Attempt ===");
+  Serial.print("SSID: "); Serial.println(ssid);
+  
+  // Complete WiFi reset
+  WiFi.mode(WIFI_OFF);
+  delay(500);
+  WiFi.mode(WIFI_STA);
+  delay(500);
+  
+  // Try DHCP first
+  Serial.println("Attempting DHCP connection...");
+  WiFi.begin(ssid, password);
+  unsigned long start = millis();
+  while(WiFi.status() != WL_CONNECTED && millis() - start < 6000) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println();
+  
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("DHCP connection successful!");
+    return true;
+  }
+  
+  // Try multiple static IP ranges for iPhone hotspots
+  IPAddress configs[3][2] = {
+    {local_IP_1, gateway_1},
+    {local_IP_2, gateway_2}, 
+    {local_IP_3, gateway_3}
+  };
+  
+  String ranges[] = {"172.20.10.x", "192.168.43.x", "10.0.0.x"};
+  
+  for(int i = 0; i < 3; i++) {
+    Serial.print("Trying static IP range: "); Serial.println(ranges[i]);
+    
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    delay(500);
+    WiFi.mode(WIFI_STA);
+    delay(500);
+    
+    if(!WiFi.config(configs[i][0], configs[i][1], subnet, primaryDNS, secondaryDNS)) {
+      Serial.println("Failed to configure static IP");
+      continue;
     }
-    if(WiFi.status() != WL_CONNECTED) {
-      drawWiFiFailedScreen();
-      delay(2000);
-      return "WiFi fail";
+    
+    WiFi.begin(ssid, password);
+    start = millis();
+    while(WiFi.status() != WL_CONNECTED && millis() - start < 5000) {
+      Serial.print(".");
+      delay(500);
+    }
+    Serial.println();
+    
+    if(WiFi.status() == WL_CONNECTED) {
+      Serial.print("Static IP connection successful with range: ");
+      Serial.println(ranges[i]);
+      Serial.print("IP: "); Serial.println(WiFi.localIP());
+      return true;
     }
   }
+  
+  Serial.println("All connection attempts failed");
+  return false;
+}
+
+// Gemini 2.0 Flash Call with retry & timeout
+String queryAI(String input){
+  // Try to connect to WiFi
+  if(!connectToWiFi()) {
+    drawWiFiFailedScreen();
+    delay(2000);
+    return "WiFi fail";
+  }
+  
+  // Show success and network info
+  Serial.println("=== WiFi Connected Successfully ===");
+  Serial.print("IP: "); Serial.println(WiFi.localIP());
+  Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
+  drawWiFiSuccessScreen();
+  delay(1000);
 
   String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
@@ -428,10 +478,12 @@ String queryAI(String input){
         "Your responses must be:"
         "Concise, clear, and structured, suitable for a very small display.Avoid unnecessary words; prioritize key information."
         "Always answer fully and informatively, even if the user types only a single keyword,such as the name of an author, topic, or concept. Infer the intended question and provide relevant details (e.g., background, main works, context)."
-        "Respond in the inputs language (English, Czech or German) using only the basic 26-character alphabet (A-Z), digits,punctuation, and dashes if necessary. Avoid accents, diacritics, or any foreign special characters."
+        "Respond in the inputs language (English, Czech) using only the basic 26-character alphabet (A-Z), digits,punctuation, and dashes if necessary. Avoid accents, diacritics, or any foreign special characters."
         "Support inputs typed in English or Czech (without diacritics or special characters).Automatically understand the input language and provide an informative answer."
+        "Format text in a way so it fits the devices screen. One line of text you respond is one page on the device. It can be maximum 84 characters. Try to fit as much informations on each line (page) as possible"
         "Prioritize accuracy and relevance over brevity if needed, but still be concise. "
         "Avoid asking clarifying questions like what do you mean by X; always assume the user wants the most likely and relevant answer."
+        "Always respond in the inputs language, if your unsure, use english"
         "Avoid blank lines in the response, since the space is tight, try to fit as many useful information to the available space";
 
   String prompt = systemInstructions + " Input: " + input;
@@ -449,30 +501,68 @@ String queryAI(String input){
   String responseText = "";
   int retries = 0;
 
+  Serial.println("Starting API request...");
+  
   while(retries < HTTP_RETRIES){
+    Serial.print("Attempt "); Serial.print(retries + 1); Serial.print("/"); Serial.println(HTTP_RETRIES);
+    
+    // Check WiFi connection before each attempt
+    if(WiFi.status() != WL_CONNECTED) {
+      Serial.println("WiFi disconnected during request");
+      if(!connectToWiFi()) {
+        http.end();
+        return "WiFi fail";
+      }
+    }
+    
     int httpCode = http.POST(payload);
+    Serial.print("HTTP Response Code: "); Serial.println(httpCode);
+    
     if(httpCode == 200){
       String raw = http.getString();
-
-      DynamicJsonDocument doc(8192);
-      DeserializationError error = deserializeJson(doc, raw);
-      if(!error){
-        if(doc.containsKey("candidates") &&
-           doc["candidates"][0].containsKey("content") &&
-           doc["candidates"][0]["content"].containsKey("parts") &&
-           doc["candidates"][0]["content"]["parts"][0].containsKey("text")) {
-          responseText = doc["candidates"][0]["content"]["parts"][0]["text"].as<String>();
-          responseText.trim();
+      Serial.print("Response length: "); Serial.println(raw.length());
+      
+      if(raw.length() > 0) {
+        DynamicJsonDocument doc(8192);
+        DeserializationError error = deserializeJson(doc, raw);
+        if(!error){
+          if(doc.containsKey("candidates") &&
+             doc["candidates"][0].containsKey("content") &&
+             doc["candidates"][0]["content"].containsKey("parts") &&
+             doc["candidates"][0]["content"]["parts"][0].containsKey("text")) {
+            responseText = doc["candidates"][0]["content"]["parts"][0]["text"].as<String>();
+            responseText.trim();
+            Serial.println("API response received successfully");
+            break;
+          } else {
+            Serial.println("Invalid JSON structure");
+          }
+        } else {
+          Serial.print("JSON parse error: "); Serial.println(error.c_str());
         }
+      } else {
+        Serial.println("Empty response received");
       }
-      break;
+    } else if(httpCode > 0) {
+      Serial.print("HTTP error: "); Serial.println(httpCode);
+      String errorResponse = http.getString();
+      Serial.print("Error details: "); Serial.println(errorResponse);
     } else {
-      retries++;
-      delay(500);
+      Serial.println("Connection failed");
+    }
+    
+    retries++;
+    if(retries < HTTP_RETRIES) {
+      Serial.println("Retrying in 1 second...");
+      delay(1000);
     }
   }
 
-  if(retries == HTTP_RETRIES) responseText = "HTTP fail";
+  if(responseText.length() == 0) {
+    responseText = "HTTP fail";
+    Serial.println("All HTTP attempts failed");
+  }
+  
   http.end();
   return responseText;
 }
@@ -910,9 +1000,6 @@ void setup() {
       Serial.println(F("SSD1306 allocation failed"));
       return;
   }
-  
-  // Show welcome screen
-  showWelcomeScreen();
   
   pinMode(BUTTON_PIN, INPUT_PULLDOWN);
   pinMode(SYSSW_PIN, INPUT_PULLUP);  // System button for mode switching
