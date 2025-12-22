@@ -1,4 +1,4 @@
-[![Meet Scribe – Your AI Thought Partner in a Pen](https://img.youtube.com/vi/QY42d00tYvc/0.jpg)](https://www.youtube.com/watch?v=QY42d00tYvc)
+[![Watch the video](https://img.youtube.com/vi/QY42d00tYvc/maxresdefault.jpg)](https://youtu.be/QY42d00tYvc)
 
 # Update 2025: 
 ## PCB for scribe available here: 
