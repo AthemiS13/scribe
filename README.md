@@ -1,4 +1,4 @@
-![Scribe-banner](https://github.com/freddycz/smart-pen/blob/main/Hardware/Banner.png)
+![Scribe-video](https://youtu.be/QY42d00tYvc?si=lBfsLKSwl6jxPYtL)
 
 # Update 2025: 
 ## PCB for scribe available here: 
