@@ -1,50 +1,66 @@
+# Scribe (Hardware)
+
 [**▶ Watch the Scribe 2025 Demo on YouTube**](https://youtu.be/QY42d00tYvc)
 
 [![Watch the video](https://img.youtube.com/vi/QY42d00tYvc/maxresdefault.jpg)](https://youtu.be/QY42d00tYvc)
 
-# Update 2025: 
-## PCB for scribe available here: 
-https://oshwlab.com/atemis/smartpen
+## Overview
 
-![PCB-FRONT](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160039.png)
+Scribe is a compact device designed to enhance productivity and memory retention. With a slim width of just 12mm, it incorporates a custom PCB for a sleek and efficient design. This device features an OLED screen, Bluetooth connectivity for seamless communication with PC, and a rechargeable LiPo battery with built-in protection and charging circuit.
 
-![PCB-BACk](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160101.png)
+This repository contains the firmware and hardware design files for the Scribe device.
 
-![PCB-LAYOUT](https://github.com/freddycz/smart-pen/blob/main/Hardware/Screenshot%202024-11-30%20160855.png)
-
-1. After 2 months of 24/7 grind, I was able to get scribe to work. I would like to thank [OSHW LAB](https://oshwlab.com/ "OSHW") for sponsoring me. Without them, it would be extremely difficult to complete this project because of its very high cost. And also big thanks to my friend ([George](https://github.com/freddycz)) for helping me with the backend of Scribe App.
-2. Scribe now has a custom 12 mm PCB (more than 60% smaller than V1) and many other features including battery status indicator, lipo protection, in-hand detection, reworked main switch, and more
-3. I will update the .md of this project once my colleague [George](https://github.com/freddycz "George") finishes the user interface.
-4. 3D design is still not done yet since I have a lot of work.
-
-# scribe
-
-scribe is a compact device designed to enhance productivity and memory retention
-
-## Wiring
-
-| Name | Pin  | Desctiption  |
-| ------------ | ------------ | ------------ |
-| SCL  | GPIO4  |  OLED |
-| SDA  |  GPIO5 | OLED  |
-| CTGSW  | GPIO8  | Cartridge BTN  Pulldown |
-| BATADC  | GPIO33  | Battery Voltage  |
-| SYSSW  | GPIO37  | System BTN  Pulldown|
-| TCH | GPIO2  | Touch Sensor  |
+**Companion App:** [Scribe App](../scribe-app/README.md) - The software interface for sending data to Scribe.
 
 ## Features
 
-**Core:** ESP32-S3FN8 Processor with integrated 8MB Flash Memory    
-**Communication:** Bluetooth, Wifi and Serial USB-C    
-**Power management:** Single cell Li-Po 3.7v Battery charging circuit with 0.6A Charging current and overcharging, discharging, overcurrent protection.    
-**Screen:** 0.91 Inch OLED i2C with SSD1306 driver    
-**Buttons:** The System button is present physically on the PCB. The cartridge button is a soldering pad on one end of the PCB. Boot and EN are exposed solder pads (You can short them and trigger the action in an emergency).    
-**Sensors:** Capacitive Touch pin and Battery voltage level ADC (Needs to be calibrated)
+*   **Core:** ESP32-S3 Microcontroller for powerful processing and connectivity.
+*   **Display:** 0.91 Inch OLED (128x32) for clear text display.
+*   **Connectivity:** 
+    *   Bluetooth Low Energy (BLE) for communication with the Scribe App.
+    *   WiFi capabilities for AI integration.
+*   **AI Integration:** Features AI-powered functions (e.g., Gemini integration) for enhanced utility.
+*   **Power:** 
+    *   Rechargeable LiPo battery.
+    *   Built-in charging and protection circuit.
+    *   Battery voltage monitoring.
+*   **Input:** Physical system button for navigation and control.
 
+## Application
 
-## Sponsored by:
-![Sponsor](https://github.com/AthemiS13/smart-pen/blob/main/Hardware/oshw.png)
+The primary function of Scribe is to assist with memory and organization. Users can send text strings via the [Scribe App](../scribe-app/README.md), which the Scribe firmware processes and organizes into pages. This helps users keep track of important notes, dates, and names, enhancing their ability to recall information easily.
 
+## Hardware & Schematic
 
+The schematic for Scribe outlines a compact and efficient design, featuring an ESP32-S3 microcontroller for core processing and Bluetooth connectivity. It includes a LiPo battery charging and protection circuit, a 3.3V regulator for stable power, and connections for an OLED display and system button. Key components are protected with ESD diodes and filtering capacitors, ensuring reliable operation and robust performance.
 
+### PCB
+The custom 12mm PCB is over 60% smaller than the V1 prototype.
+*   **PCB Design:** Available on [OSHW Lab](https://oshwlab.com/atemis/smartpen)
 
+### Pinout
+
+| Name | Pin | Description |
+| :--- | :--- | :--- |
+| **SCL** | GPIO 4 | OLED Clock |
+| **SDA** | GPIO 5 | OLED Data |
+| **BTN** | GPIO 8 | System Button (Pulldown) |
+| **BAT** | GPIO 2 | Battery Voltage Monitoring |
+
+*Note: The cartridge touch pin functionality was discontinued to utilize the pin (GPIO 2) for accurate battery voltage monitoring, correcting an issue in the initial design.*
+
+## Development
+
+The firmware is developed using PlatformIO and Arduino framework.
+
+### Structure
+*   `src/`: Source code for the firmware.
+    *   `scribe.ino`: Main firmware logic for page display and navigation.
+    *   `ai.ino`: AI features and WiFi connectivity.
+*   `platformio.ini`: Project configuration.
+
+## Credits
+
+*   **Hardware Design & Firmware:** [AthemiS13](https://github.com/AthemiS13)
+*   **App Backend:** [George](https://github.com/freddycz)
+*   **Sponsor:** [OSHW LAB](https://oshwlab.com/)
