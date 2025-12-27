@@ -10,7 +10,7 @@ Scribe is a compact device designed to enhance productivity and memory retention
 
 This repository contains the firmware and hardware design files for the Scribe device.
 
-**Companion App:** [Scribe App](../scribe-app/README.md) - The software interface for sending data to Scribe.
+**Companion App:** [Scribe App](https://github.com/AthemiS13/scribe-app) - The software interface for sending data to Scribe.
 
 ## Features
 
@@ -28,7 +28,7 @@ This repository contains the firmware and hardware design files for the Scribe d
 
 ## Application
 
-The primary function of Scribe is to assist with memory and organization. Users can send text strings via the [Scribe App](../scribe-app/README.md), which the Scribe firmware processes and organizes into pages. This helps users keep track of important notes, dates, and names, enhancing their ability to recall information easily.
+The primary function of Scribe is to assist with memory and organization. Users can send text strings via the [Scribe App](https://github.com/AthemiS13/scribe-app), which the Scribe firmware processes and organizes into pages. This helps users keep track of important notes, dates, and names, enhancing their ability to recall information easily.
 
 ## Hardware & Schematic
 
