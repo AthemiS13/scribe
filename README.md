@@ -38,6 +38,10 @@ The schematic for Scribe outlines a compact and efficient design, featuring an E
 The custom 12mm PCB is over 60% smaller than the V1 prototype.
 *   **PCB Design:** Available on [OSHW Lab](https://oshwlab.com/atemis/smartpen)
 
+![PCB Front](Hardware/Screenshot%202024-11-30%20160039.png)
+![PCB Back](Hardware/Screenshot%202024-11-30%20160101.png)
+![PCB Layout](Hardware/Screenshot%202024-11-30%20160855.png)
+
 ### Pinout
 
 | Name | Pin | Description |
@@ -53,6 +57,11 @@ The custom 12mm PCB is over 60% smaller than the V1 prototype.
 
 The firmware is developed using PlatformIO and Arduino framework.
 
+### Arduino Setup
+**Important:** Since Scribe uses a custom-built board, a specific Arduino setup is required for the ESP32-S3 features to function correctly. Please refer to the settings in the image below:
+
+![Arduino Setup](Hardware/Screenshot%202024-12-20%20213204.png)
+
 ### Structure
 *   `src/`: Source code for the firmware.
     *   `scribe.ino`: Main firmware logic for page display and navigation.
@@ -64,3 +73,5 @@ The firmware is developed using PlatformIO and Arduino framework.
 *   **Hardware Design & Firmware:** [AthemiS13](https://github.com/AthemiS13)
 *   **App Backend:** [George](https://github.com/freddycz)
 *   **Sponsor:** [OSHW LAB](https://oshwlab.com/)
+
+![OSHW Sponsor](Hardware/oshw.png)
