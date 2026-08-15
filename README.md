@@ -54,6 +54,12 @@ The custom 12mm PCB is over 60% smaller than the V1 prototype.
 
 *Note: The cartridge touch pin functionality was discontinued to utilize the pin (GPIO 2) for accurate battery voltage monitoring, correcting an issue in the initial design.*
 
+## Known Issues / Corrections
+If you are replicating this project, please note the following mistakes in the original schematic:
+
+- **External SPI flash:** The ESP32-S3FN8 already includes 8 MB of internal flash. The external SPI flash shown in the schematic is connected to the same SPI0/1 flash interface and should **not** be populated/used with this ESP32 variant. Either remove the external flash or use an ESP32-S3 variant without built-in flash.
+- **Battery ADC pin:** The `BATADC` signal was originally routed to **GPIO33**, which is **not ADC-capable on the ESP32-S3**. Route `BATADC` to one of the ESP32-S3's ADC-capable GPIOs instead.
+
 ## Development
 
 The firmware is developed using PlatformIO and Arduino framework.
